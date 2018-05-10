@@ -8,6 +8,67 @@ function getStructure(path, file, cb){
     }
   });
 }
+function sortByDate(sep, key){
+  return function(a,b){
+    let trueSortA = key!=undefined?a[key]:a;
+    let trueSortB = key!=undefined?b[key]:b;
+    let _trueSortA = trueSortA.split('');
+    _trueSortA.reverse();
+    _trueSortA = _trueSortA.join('').replace(/(.)+\./,'').split('');
+    _trueSortA.reverse();
+    trueSortA = _trueSortA.join('');
+    let _trueSortB = trueSortB.split('');
+    _trueSortB.reverse();
+    _trueSortB = _trueSortB.join('').replace(/(.)+\./,'').split('');
+    _trueSortB.reverse();
+    trueSortB = _trueSortB.join('');
+    let sepA = trueSortA.split(sep);
+    let sepB = trueSortB.split(sep);
+    if(!isNaN(parseFloat(sepA[0]))){
+      if(isNaN(parseFloat(sepB[0]))){
+        return -1;
+      }
+    }else if(isNaN(parseFloat(sepA[0]))){
+      if(!isNaN(parseFloat(sepB[0]))){
+        return 1;
+      }
+    }
+    for(let ind = 0; ind < sepA.length; ind++){
+      if(ind < sepB.length){
+        if(!isNaN(parseFloat(sepA[ind]))){
+          if(!isNaN(parseFloat(sepB[ind]))){
+            if(parseFloat(sepA[ind]) > parseFloat(sepB[ind])){
+              return 1;
+            }else if(parseFloat(sepA[ind]) < parseFloat(sepB[ind])){
+              return -1;
+            }
+          }else{
+            if(parseFloat(sepA[ind]) > sepB[ind]){
+              return 1;
+            }else if(parseFloat(sepA[ind]) < sepB[ind]){
+              return -1;
+            }
+          }
+        }else{
+          if(!isNaN(parseFloat(sepB[ind]))){
+            if(sepA[ind] > parseFloat(sepB[ind])){
+              return 1;
+            }else if(sepA[ind] < parseFloat(sepB[ind])){
+              return -1;
+            }
+          }else{
+            if(sepA[ind] > sepB[ind]){
+              return 1;
+            }else if(sepA[ind] < sepB[ind]){
+              return -1;
+            }
+          }
+        }
+      }
+    }
+    return 0;
+  }
+}
 let ctx = new AudioContext();
 function setView(fileName, pathToFile){
   if(document.getElementById('docViewer')){
@@ -35,6 +96,7 @@ getStructure(['Audio Recordings'], 'files.prn', function(t){
       name: f
     });
   });
+  _audioFiles.sort(sortByDate('_','name'));
 });
 getStructure(['History 2'], 'files.prn', function(t){
   let arr = t.split('\n').filter(o=>o!='');
@@ -43,6 +105,7 @@ getStructure(['History 2'], 'files.prn', function(t){
       name: f
     });
   });
+  _noteFiles.sort(sortByDate('-','name'));
 });
 var app = angular.module('app', []);
 app.controller("audioControl", function($scope) {
